@@ -1,7 +1,7 @@
 {
   "name": "nebulagui",
   "productName": "NebulaGUI",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Use the HeliosLauncher Nebula for distribution.json with a GUI",
   "main": "src/index.js",
   "scripts": {
