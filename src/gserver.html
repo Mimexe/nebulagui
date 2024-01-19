@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Nebula GUI - Générer un serveur</title>
+    <link rel="stylesheet" href="index.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div id="suces" style="display: none">
+      <h1 style="color: greenyellow">Serveur généré avec succès!</h1>
+    </div>
+    <div id="boji">
+      <h1>Nebula GUI</h1>
+      <p>donne les infos de ton serv C'EST UN HOLDUP</p>
+      <div style="display: none" class="alert alert-danger" role="alert"></div>
+      <label for="serverId" class="form-label">ID du serveur</label>
+      <input required type="text" class="form-control" id="serverId" />
+      <label for="mcVer" class="form-label">Version minecraft</label>
+      <input required type="text" class="form-control" id="mcVer" />
+      <label for="serverType" class="form-label">Type serveur</label>
+      <select class="form-select" id="serverType">
+        <option value="forge">Forge</option>
+        <option value="fabric">Fabric</option>
+      </select>
+      <div id="forge">
+        <label for="forgeVer" class="form-label">Version forge</label>
+        <div class="input-group">
+          <input required type="text" class="form-control" id="forgeVer" />
+          <div class="input-group-text">
+            <button
+              class="btn btn-primary"
+              id="gggetvers"
+              onclick="getVersion()"
+            >
+              get a version
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="fabric" style="display: none">
+        <label for="fabricVer" class="form-label">Version fabric</label>
+        <input required type="text" class="form-control" id="fabricVer" />
+      </div>
+      <button
+        id="gserver"
+        class="btn btn-primary"
+        onclick="generate()"
+        style="margin-top: 10px"
+      >
+        Générer le serveur
+      </button>
+      <button
+        class="btn btn-danger"
+        style="margin-top: 10px"
+        onclick="window.close()"
+      >
+        Annuler
+      </button>
+    </div>
+    <script>
+      const { ipcRenderer } = require("electron");
+      const forge = document.getElementById("forge");
+      const fabric = document.getElementById("fabric");
+      const serverType = document.getElementById("serverType");
+      const serverId = document.getElementById("serverId");
+      const mcVer = document.getElementById("mcVer");
+      const forgeVer = document.getElementById("forgeVer");
+      const fabricVer = document.getElementById("fabricVer");
+      const loadingElem = new Map();
+
+      serverType.addEventListener("change", () => {
+        if (serverType.value === "forge") {
+          forge.style.display = "block";
+          fabric.style.display = "none";
+        } else {
+          forge.style.display = "none";
+          fabric.style.display = "block";
+        }
+      });
+
+      async function getVersion() {
+        setLoading(true, "#gggetvers");
+        const type = await ipcRenderer.invoke("get-forge-popup");
+        if (type.error) {
+          showAlert(res.error);
+          setLoading(false, "#gggetvers");
+          return;
+        }
+        const res = await ipcRenderer.invoke("get-forge", type, mcVer.value);
+        if (res.error) {
+          showAlert(res.error);
+          setLoading(false, "#gggetvers");
+          return;
+        }
+        forgeVer.value = res.version;
+        console.log(res);
+        setLoading(false, "#gggetvers");
+      }
+      function setLoading(loading, tag) {
+        const element = document.querySelector(tag);
+        if (!element) return console.error("element not found: " + tag);
+        if (loading) {
+          loadingElem.set(element, element.innerHTML);
+          element.disabled = true;
+          element.innerHTML =
+            "<div class='spinner-border' role='status'><span class='visually-hidden'>Loading...</span></div> Chargement...";
+        } else {
+          if (!loadingElem.get(element))
+            return console.error("element not found in loadingElem: " + tag);
+          element.innerHTML = loadingElem.get(element);
+          element.disabled = false;
+          loadingElem.delete(element);
+        }
+      }
+
+      function showAlert(text) {
+        document.getElementById("gserver").disabled = true;
+        document.getElementById("gserver").innerHTML = "Erreur!";
+        document.getElementById("gserver").className = "btn btn-warning";
+        const alert = document.querySelector(".alert");
+        alert.style.display = "block";
+        alert.innerHTML = text;
+        // return to top
+        window.scrollTo(0, 0);
+        setTimeout(() => {
+          document.getElementById("gserver").innerHTML = "Générer le serveur";
+          document.getElementById("gserver").className = "btn btn-primary";
+          document.getElementById("gserver").disabled = false;
+        }, 3000);
+      }
+
+      async function generate() {
+        setLoading(true, "#gserver");
+        let res;
+        if (serverType.value === "forge") {
+          res = await ipcRenderer.invoke("confirmServer", {
+            serverId: serverId.value,
+            mcVer: mcVer.value,
+            forgeVer: forgeVer.value,
+          });
+        } else {
+          res = await ipcRenderer.invoke("confirmServer", {
+            serverId: serverId.value,
+            mcVer: mcVer.value,
+            fabricVer: fabricVer.value,
+          });
+        }
+        setLoading(false, "#gserver");
+        if (res.error) {
+          showAlert(res.error);
+        } else if (res.success) {
+          document.getElementById("boji").style.display = "none";
+          document.getElementById("suces").style.display = "block";
+          setTimeout(() => {
+            window.close();
+          }, 2000);
+        }
+      }
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

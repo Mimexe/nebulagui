@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Nebula GUI</title>
+    <link rel="stylesheet" href="index.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <h1>Nebula GUI</h1>
+    <p>bienvenue mon reuuuuuuuuuuf</p>
+    <p id="dir">Nebula: ...</p>
+    <div class="container text-center">
+      <div class="row">
+        <div class="col">
+          <button
+            id="gserver"
+            class="btn btn-primary"
+            onclick="generateServer()"
+          >
+            Générer un serveur
+          </button>
+        </div>
+        <div class="col">
+          <button
+            id="gdistro"
+            class="btn btn-primary"
+            onclick="generateDistro()"
+          >
+            Compiler la distribution
+          </button>
+        </div>
+        <div class="col">
+          <button id="initRoot" class="btn btn-primary" onclick="initRoot()">
+            Initialiser le dossier root
+          </button>
+        </div>
+        <div class="col">
+          <button
+            id="openfolder"
+            class="btn btn-primary"
+            onclick="openNebulaDir()"
+          >
+            Ouvrir le dossier
+          </button>
+        </div>
+        <div class="col">
+          <button
+            id="openrootfolder"
+            class="btn btn-primary"
+            onclick="openNebulaRootDir()"
+          >
+            Ouvrir le dossier root
+          </button>
+        </div>
+      </div>
+    </div>
+    <p>
+      Mods requis dans
+      path_to_your_nebula_dir_with_your_server\forgemods\required
+    </p>
+    <p>
+      Mods optionel activé dans
+      path_to_your_nebula_dir_with_your_server\forgemods\optionalon
+    </p>
+    <p>
+      Mods optionel désactivé dans
+      path_to_your_nebula_dir_with_your_server\forgemods\optionaloff
+    </p>
+    <script>
+      const { ipcRenderer } = require("electron");
+      const fs = require("fs");
+      const path = require("path");
+      let nebulaDir;
+      const loadingElem = new Map();
+      function button(text, onclick) {
+        return `<button type="button" class="btn btn-primary" onclick="${onclick}">${text}</button>`;
+      }
+      function setLoading(loading, tag) {
+        const element = document.querySelector(tag);
+        if (!element) return console.error("element not found: " + tag);
+        if (loading) {
+          loadingElem.set(element, element.innerHTML);
+          element.disabled = true;
+          element.innerHTML =
+            "<div class='spinner-border' role='status'><span class='visually-hidden'>Loading...</span></div> Chargement...";
+        } else {
+          if (!loadingElem.get(element))
+            return console.error("element not found in loadingElem: " + tag);
+          element.innerHTML = loadingElem.get(element);
+          element.disabled = false;
+          loadingElem.delete(element);
+        }
+      }
+      function generateServer() {
+        setLoading(true, "#gserver");
+        ipcRenderer
+          .invoke("generateServer")
+          .then((res) => {
+            console.log(res);
+            setLoading(false, "#gserver");
+          })
+          .catch((err) => {
+            console.error(err);
+            setLoading(false, "#gserver");
+          });
+      }
+      function openNebulaDir() {
+        const { shell } = require("electron");
+        if (!nebulaDir) {
+          document.getElementById("openfolder").innerHTML = "ERREUR!";
+          setTimeout(() => {
+            document.getElementById("openfolder").innerHTML =
+              "Ouvrir le dossier";
+          }, 3000);
+          return;
+        }
+        shell.openPath(nebulaDir);
+      }
+      function openNebulaRootDir() {
+        const { shell } = require("electron");
+        if (!nebulaDir) {
+          document.getElementById("openrootfolder").innerHTML = "ERREUR!";
+          setTimeout(() => {
+            document.getElementById("openrootfolder").innerHTML =
+              "Ouvrir le dossier";
+          }, 3000);
+          return;
+        }
+        const envfile = path.join(nebulaDir, ".env");
+        const env = fs.readFileSync(envfile, "utf-8").toString();
+        const envlines = env.split("\n");
+        const envobj = {};
+        for (const envline of envlines) {
+          const envsplit = envline.split("=");
+          envobj[envsplit[0]] = envsplit[1];
+        }
+        shell.openPath(envobj.ROOT.trim());
+      }
+      function generateDistro() {
+        setLoading(true, "#gdistro");
+        ipcRenderer
+          .invoke("generateDistro")
+          .then((res) => {
+            console.log(res);
+            if (res?.error) {
+              alert("Erreur: " + res.error);
+            }
+            setLoading(false, "#gdistro");
+          })
+          .catch((err) => {
+            console.error(err);
+            setLoading(false, "#gdistro");
+          });
+      }
+      function initRoot() {
+        setLoading(true, "#initRoot");
+        ipcRenderer
+          .invoke("initRoot")
+          .then(async (res) => {
+            console.log(res);
+            if (res?.error) {
+              alert("Erreur: " + res.error);
+            }
+            setLoading(false, "#initRoot");
+            getNebulaDir();
+          })
+          .catch((err) => {
+            console.error(err);
+            setLoading(false, "#initRoot");
+          });
+      }
+      async function getNebulaDir(force = false) {
+        if (force || !nebulaDir) {
+          nebulaDir = await ipcRenderer.invoke("getNebulaDir");
+          if (!nebulaDir) nebulaDir = null;
+        }
+        console.log(nebulaDir);
+        let str = "Nebula: ";
+        if (nebulaDir) {
+          str = "Nebula: " + nebulaDir;
+          str += " " + button("modifier", "getNebulaDir(true)");
+          str += " " + button("rafraichir", "getNebulaDir()");
+          ipcRenderer.send("nebulaDir", nebulaDir);
+          document.getElementById("gserver").disabled = false;
+          document.getElementById("gdistro").disabled = false;
+          document.getElementById("initRoot").disabled = false;
+          document.getElementById("openfolder").disabled = false;
+          document.getElementById("openrootfolder").disabled = false;
+          const envfile = path.join(nebulaDir, ".env");
+          const env = fs.readFileSync(envfile, "utf-8").toString();
+          const envlines = env.split("\n");
+          const envobj = {};
+          for (const envline of envlines) {
+            const envsplit = envline.split("=");
+            envobj[envsplit[0]] = envsplit[1];
+          }
+          if (fs.existsSync(envobj.ROOT.trim())) {
+            document.getElementById("initRoot").disabled = true;
+            document.getElementById("gserver").disabled = false;
+            document.getElementById("gdistro").disabled = false;
+          } else {
+            document.getElementById("initRoot").disabled = false;
+            document.getElementById("gserver").disabled = true;
+            document.getElementById("gdistro").disabled = true;
+          }
+        } else {
+          str = "Nebula: " + button("réessayer", "getNebulaDir()");
+          ipcRenderer.send("nebulaDir", null);
+          document.getElementById("gserver").disabled = true;
+          document.getElementById("gdistro").disabled = true;
+          document.getElementById("initRoot").disabled = true;
+          document.getElementById("openfolder").disabled = true;
+          document.getElementById("openrootfolder").disabled = true;
+        }
+        document.getElementById("dir").innerHTML = str;
+        return nebulaDir;
+      }
+      window.onload = async () => {
+        await getNebulaDir();
+      };
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
