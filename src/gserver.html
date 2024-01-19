@@ -13,11 +13,12 @@
   </head>
   <body>
     <div id="suces" style="display: none">
-      <h1 style="color: greenyellow">Serveur généré avec succès!</h1>
+      <h1 style="color: green" id="successgenerated">
+        Serveur généré avec succès!
+      </h1>
     </div>
     <div id="boji">
       <h1>Nebula GUI</h1>
-      <p>donne les infos de ton serv C'EST UN HOLDUP</p>
       <div style="display: none" class="alert alert-danger" role="alert"></div>
       <label for="serverId" class="form-label">ID du serveur</label>
       <input required type="text" class="form-control" id="serverId" />
@@ -29,7 +30,9 @@
         <option value="fabric">Fabric</option>
       </select>
       <div id="forge">
-        <label for="forgeVer" class="form-label">Version forge</label>
+        <label for="forgeVer" id="forgeverrr" class="form-label"
+          >Version forge</label
+        >
         <div class="input-group">
           <input required type="text" class="form-control" id="forgeVer" />
           <div class="input-group-text">
@@ -44,7 +47,9 @@
         </div>
       </div>
       <div id="fabric" style="display: none">
-        <label for="fabricVer" class="form-label">Version fabric</label>
+        <label for="fabricVer" id="fabverrrr" class="form-label"
+          >Version fabric</label
+        >
         <input required type="text" class="form-control" id="fabricVer" />
       </div>
       <button
@@ -57,6 +62,7 @@
       </button>
       <button
         class="btn btn-danger"
+        id="cancel"
         style="margin-top: 10px"
         onclick="window.close()"
       >
@@ -71,7 +77,11 @@
       const serverId = document.getElementById("serverId");
       const mcVer = document.getElementById("mcVer");
       const forgeVer = document.getElementById("forgeVer");
+      window.addEventListener("DOMContentLoaded", () => {
+        console.log(forgeVer);
+      });
       const fabricVer = document.getElementById("fabricVer");
+      let lang;
       const loadingElem = new Map();
 
       serverType.addEventListener("change", () => {
@@ -109,7 +119,8 @@
           loadingElem.set(element, element.innerHTML);
           element.disabled = true;
           element.innerHTML =
-            "<div class='spinner-border' role='status'><span class='visually-hidden'>Loading...</span></div> Chargement...";
+            "<div class='spinner-border' role='status'><span class='visually-hidden'>Loading...</span></div> " +
+            (lang == "en" ? "Loading..." : "Chargement...");
         } else {
           if (!loadingElem.get(element))
             return console.error("element not found in loadingElem: " + tag);
@@ -121,7 +132,8 @@
 
       function showAlert(text) {
         document.getElementById("gserver").disabled = true;
-        document.getElementById("gserver").innerHTML = "Erreur!";
+        document.getElementById("gserver").innerHTML =
+          lang === "en" ? "Error!" : "Erreur!";
         document.getElementById("gserver").className = "btn btn-warning";
         const alert = document.querySelector(".alert");
         alert.style.display = "block";
@@ -129,7 +141,8 @@
         // return to top
         window.scrollTo(0, 0);
         setTimeout(() => {
-          document.getElementById("gserver").innerHTML = "Générer le serveur";
+          document.getElementById("gserver").innerHTML =
+            lang === "en" ? "Generate Server" : "Générer le serveur";
           document.getElementById("gserver").className = "btn btn-primary";
           document.getElementById("gserver").disabled = false;
         }, 3000);
@@ -138,6 +151,11 @@
       async function generate() {
         setLoading(true, "#gserver");
         let res;
+        console.log(serverType.value);
+        console.log(serverId.value);
+        console.log(mcVer.value);
+        console.log(forgeVer.value);
+        console.log(fabricVer.value);
         if (serverType.value === "forge") {
           res = await ipcRenderer.invoke("confirmServer", {
             serverId: serverId.value,
@@ -162,6 +180,32 @@
           }, 2000);
         }
       }
+      window.onload = async () => {
+        lang = await ipcRenderer.invoke("lang");
+        if (lang == "en") {
+          document.querySelector("label[for=serverId]").innerHTML = "Server ID";
+          document.querySelector("label[for=mcVer]").innerHTML =
+            "Minecraft version";
+          document.querySelector("label[for=forgeVer]").innerHTML =
+            "Forge version";
+          document.querySelector("label[for=fabricVer]").innerHTML =
+            "Fabric version";
+          document.querySelector("label[for=serverType]").innerHTML =
+            "Server type";
+          document.getElementById("gserver").innerHTML = "Generate server";
+          document.getElementById("gggetvers").innerHTML = "get a version";
+          document.getElementById("serverType").innerHTML = `
+          <option value="forge">Forge</option>
+          <option value="fabric">Fabric</option>
+          `;
+          document.getElementById("forgeverrr").innerHTML = "Forge version";
+          document.getElementById("fabverrrr").innerHTML = "Fabric version";
+          document.getElementById("cancel").innerHTML = "Cancel";
+          document.getElementById("successgenerated").innerHTML =
+            "Server generated successfully!";
+          document.title = "Nebula GUI - Generate a server";
+        }
+      };
     </script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"

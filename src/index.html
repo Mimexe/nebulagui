@@ -13,7 +13,7 @@
   </head>
   <body>
     <h1>Nebula GUI</h1>
-    <p>Bienvenue</p>
+    <p id="welcome">Bienvenue</p>
     <p id="dir">Nebula: ...</p>
     <div class="container text-center">
       <div class="row">
@@ -58,17 +58,32 @@
             Ouvrir le dossier root
           </button>
         </div>
+        <div class="col">
+          <button
+            id="ziprootfolder"
+            class="btn btn-primary"
+            onclick="zipRootFolder()"
+          >
+            Compresser le dossier root (nécessaire uniqument pour le
+            déploiement)
+          </button>
+        </div>
+        <div class="col">
+          <button id="deletezip" class="btn btn-danger" onclick="deleteZip()">
+            Supprimer le zip
+          </button>
+        </div>
       </div>
     </div>
-    <p>
+    <p id="requiredmods">
       Mods requis dans
       path_to_your_nebula_dir_with_your_server\forgemods\required
     </p>
-    <p>
+    <p id="optionalon">
       Mods optionel activé dans
       path_to_your_nebula_dir_with_your_server\forgemods\optionalon
     </p>
-    <p>
+    <p id="optionaloff">
       Mods optionel désactivé dans
       path_to_your_nebula_dir_with_your_server\forgemods\optionaloff
     </p>
@@ -76,6 +91,7 @@
       const { ipcRenderer } = require("electron");
       const fs = require("fs");
       const path = require("path");
+      let lang;
       let nebulaDir;
       const loadingElem = new Map();
       function button(text, onclick) {
@@ -88,7 +104,8 @@
           loadingElem.set(element, element.innerHTML);
           element.disabled = true;
           element.innerHTML =
-            "<div class='spinner-border' role='status'><span class='visually-hidden'>Loading...</span></div> Chargement...";
+            "<div class='spinner-border' role='status'><span class='visually-hidden'>Loading...</span></div> " +
+            (lang == "en" ? "Loading..." : "Chargement...");
         } else {
           if (!loadingElem.get(element))
             return console.error("element not found in loadingElem: " + tag);
@@ -113,10 +130,11 @@
       function openNebulaDir() {
         const { shell } = require("electron");
         if (!nebulaDir) {
-          document.getElementById("openfolder").innerHTML = "ERREUR!";
+          document.getElementById("openfolder").innerHTML =
+            lang == "en" ? "ERROR!" : "ERREUR!";
           setTimeout(() => {
             document.getElementById("openfolder").innerHTML =
-              "Ouvrir le dossier";
+              lang == "en" ? "Open folder" : "Ouvrir le dossier";
           }, 3000);
           return;
         }
@@ -125,10 +143,11 @@
       function openNebulaRootDir() {
         const { shell } = require("electron");
         if (!nebulaDir) {
-          document.getElementById("openrootfolder").innerHTML = "ERREUR!";
+          document.getElementById("openrootfolder").innerHTML =
+            lang == "en" ? "ERROR!" : "ERREUR!";
           setTimeout(() => {
             document.getElementById("openrootfolder").innerHTML =
-              "Ouvrir le dossier";
+              lang == "en" ? "Open root folder" : "Ouvrir le dossier root";
           }, 3000);
           return;
         }
@@ -175,6 +194,48 @@
             setLoading(false, "#initRoot");
           });
       }
+      function zipRootFolder() {
+        setLoading(true, "#ziprootfolder");
+        ipcRenderer
+          .invoke("zipRootFolder")
+          .then(async (res) => {
+            console.log(res);
+            if (res?.error) {
+              alert("Erreur: " + res.error);
+            }
+            setLoading(false, "#ziprootfolder");
+            getNebulaDir();
+          })
+          .catch((err) => {
+            console.error(err);
+            setLoading(false, "#ziprootfolder");
+          });
+      }
+      function deleteZip() {
+        setLoading(true, "#deletezip");
+        const path = require("path");
+        const fs = require("fs");
+        const envfile = path.join(nebulaDir, ".env");
+        const envlines = fs.readFileSync(envfile, "utf-8").split("\n");
+        let rootFolder;
+        for (const line of envlines) {
+          if (line.startsWith("ROOT=")) {
+            rootFolder = line.split("=")[1].trim();
+            break;
+          }
+        }
+        if (!rootFolder) {
+          setLoading(false, "#deletezip");
+          return alert("root folder not found");
+        }
+        if (!fs.existsSync(path.join(rootFolder, "root.zip"))) {
+          setLoading(false, "#deletezip");
+          return alert("root.zip not found");
+        }
+        fs.unlinkSync(path.join(rootFolder, "root.zip"));
+        setLoading(false, "#deletezip");
+        getNebulaDir();
+      }
       async function getNebulaDir(force = false) {
         if (force || !nebulaDir) {
           nebulaDir = await ipcRenderer.invoke("getNebulaDir");
@@ -184,14 +245,19 @@
         let str = "Nebula: ";
         if (nebulaDir) {
           str = "Nebula: " + nebulaDir;
-          str += " " + button("modifier", "getNebulaDir(true)");
-          str += " " + button("rafraichir", "getNebulaDir()");
+          str +=
+            " " +
+            button(lang == "en" ? "modify" : "modifier", "getNebulaDir(true)");
+          str +=
+            " " +
+            button(lang == "en" ? "reload" : "recharger", "getNebulaDir()");
           ipcRenderer.send("nebulaDir", nebulaDir);
           document.getElementById("gserver").disabled = false;
           document.getElementById("gdistro").disabled = false;
           document.getElementById("initRoot").disabled = false;
           document.getElementById("openfolder").disabled = false;
           document.getElementById("openrootfolder").disabled = false;
+          document.getElementById("ziprootfolder").disabled = false;
           const envfile = path.join(nebulaDir, ".env");
           const env = fs.readFileSync(envfile, "utf-8").toString();
           const envlines = env.split("\n");
@@ -204,24 +270,64 @@
             document.getElementById("initRoot").disabled = true;
             document.getElementById("gserver").disabled = false;
             document.getElementById("gdistro").disabled = false;
+            document.getElementById("ziprootfolder").disabled = false;
           } else {
             document.getElementById("initRoot").disabled = false;
             document.getElementById("gserver").disabled = true;
             document.getElementById("gdistro").disabled = true;
+            document.getElementById("ziprootfolder").disabled = true;
           }
         } else {
-          str = "Nebula: " + button("réessayer", "getNebulaDir()");
+          str =
+            "Nebula: " +
+            button(lang == "en" ? "retry" : "réessayer", "getNebulaDir()");
           ipcRenderer.send("nebulaDir", null);
           document.getElementById("gserver").disabled = true;
           document.getElementById("gdistro").disabled = true;
           document.getElementById("initRoot").disabled = true;
           document.getElementById("openfolder").disabled = true;
           document.getElementById("openrootfolder").disabled = true;
+          document.getElementById("ziprootfolder").disabled = true;
         }
         document.getElementById("dir").innerHTML = str;
+        const envfile = path.join(nebulaDir, ".env");
+        const envlines = fs.readFileSync(envfile, "utf-8").split("\n");
+        let rootFolder;
+        for (const line of envlines) {
+          if (line.startsWith("ROOT=")) {
+            rootFolder = line.split("=")[1].trim();
+            break;
+          }
+        }
+        if (!rootFolder) return;
+
+        if (!fs.existsSync(path.join(rootFolder, "root.zip"))) {
+          document.getElementById("deletezip").disabled = true;
+        } else {
+          document.getElementById("deletezip").disabled = false;
+        }
         return nebulaDir;
       }
       window.onload = async () => {
+        lang = await ipcRenderer.invoke("lang");
+        if (lang == "en") {
+          document.getElementById("gserver").innerHTML = "Generate server";
+          document.getElementById("gdistro").innerHTML = "Compile distribution";
+          document.getElementById("initRoot").innerHTML =
+            "Initialize root folder";
+          document.getElementById("openfolder").innerHTML = "Open folder";
+          document.getElementById("openrootfolder").innerHTML =
+            "Open root folder";
+          document.getElementById("welcome").innerHTML = "Welcome";
+          document.getElementById("requiredmods").innerHTML =
+            "Required mods in path_to_your_nebula_dir_with_your_server\\forgemods\\required";
+          document.getElementById("optionalon").innerHTML =
+            "Optional mods enabled in path_to_your_nebula_dir_with_your_server\\forgemods\\optionalon";
+          document.getElementById("optionaloff").innerHTML =
+            "Optional mods disabled in path_to_your_nebula_dir_with_your_server\\forgemods\\optionaloff";
+          document.getElementById("ziprootfolder").innerHTML =
+            "Compress root folder (only needed for deployment)";
+        }
         await getNebulaDir();
       };
     </script>

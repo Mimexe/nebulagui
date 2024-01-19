@@ -1,10 +1,12 @@
 const { default: axios } = require("axios");
-const { app, BrowserWindow, ipcMain } = require("electron");
-const { existsSync } = require("fs");
+const { app, BrowserWindow, ipcMain, shell } = require("electron");
+const { existsSync, readFileSync, createWriteStream } = require("fs");
 const path = require("path");
+const archiver = require("archiver");
+const { dialog } = require("electron");
 let nebulDir;
 let gserverWindow;
-
+let lang;
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
   app.quit();
@@ -30,7 +32,7 @@ async function runCmd(cmd, dir) {
   });
 }
 
-const createWindow = () => {
+const createWindow = async () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
@@ -46,16 +48,25 @@ const createWindow = () => {
   });
 
   ipcMain.handle("getNebulaDir", async () => {
-    const dialog = require("electron").dialog;
     const { cancel, filePaths } = await dialog.showOpenDialog(mainWindow, {
-      message: "Selectionner le dossier Nebula",
-      title: "Selectionner le dossier Nebula",
+      message:
+        lang == "en"
+          ? "Select your Nebula folder"
+          : "Selectionner votre dossier Nebula",
+      title:
+        lang == "en"
+          ? "Select your Nebula folder"
+          : "Selectionner votre dossier Nebula",
       properties: ["openDirectory"],
     });
-    if (!cancel) {
+    if (!cancel && filePaths.length > 0) {
       if (!existsSync(path.join(filePaths[0], ".env"))) {
         mainWindow.webContents.executeJavaScript(
-          'alert("Ce dossier ne contient pas de .env qui est necessaire pour Nebula")'
+          'alert("' +
+            (lang == "en"
+              ? "This folder doesn't contain a .env which is required for Nebula"
+              : "Ce dossier ne contient pas de .env qui est necessaire pour Nebula") +
+            '")'
         );
         return null;
       }
@@ -65,18 +76,28 @@ const createWindow = () => {
 
   ipcMain.handle("generateDistro", async () => {
     if (!nebulDir) {
-      return { error: "Veuillez selectionner le dossier Nebula" };
+      return {
+        error:
+          lang == "en"
+            ? "Please select your Nebula folder"
+            : "Veuillez selectionner le dossier Nebula",
+      };
     }
     await runCmd("npm start -- g distro", nebulDir);
     return null;
   });
 
   ipcMain.handle("get-forge-popup", async (e) => {
-    const dialog = require("electron").dialog;
     if (!gserverWindow) return console.log("gserverWindow is null");
     const { response } = await dialog.showMessageBox(gserverWindow, {
-      message: "Selectionner une version de Forge",
-      title: "Selectionner une version de Forge",
+      message:
+        lang == "en"
+          ? "Select Forge version"
+          : "Selectionner la version de Forge",
+      title:
+        lang == "en"
+          ? "Select Forge version"
+          : "Selectionner la version de Forge",
       buttons: ["latest", "recommended"],
     });
     return response === 0 ? "latest" : "recommended";
@@ -106,7 +127,12 @@ const createWindow = () => {
 
   ipcMain.handle("initRoot", async () => {
     if (!nebulDir) {
-      return { error: "Veuillez selectionner le dossier Nebula" };
+      return {
+        error:
+          lang == "en"
+            ? "Please select your Nebula folder"
+            : "Veuillez selectionner le dossier Nebula",
+      };
     }
     await runCmd("npm start -- init root", nebulDir);
     return null;
@@ -135,19 +161,106 @@ const createWindow = () => {
     return rres;
   });
 
+  ipcMain.handle("zipRootFolder", async () => {
+    if (!nebulDir) {
+      return {
+        error:
+          lang == "en"
+            ? "Please select your Nebula folder"
+            : "Veuillez selectionner le dossier Nebula",
+      };
+    }
+    // get the root folder
+    const envfile = path.join(nebulDir, ".env");
+    if (!existsSync(envfile)) {
+      return {
+        error:
+          lang == "en"
+            ? "This folder doesn't contain a .env which is required for Nebula"
+            : "Ce dossier ne contient pas de .env qui est necessaire pour Nebula",
+      };
+    }
+    const envlines = readFileSync(envfile, "utf-8").split("\n");
+    let rootFolder;
+    for (const line of envlines) {
+      if (line.startsWith("ROOT=")) {
+        rootFolder = line.split("=")[1].trim();
+        break;
+      }
+    }
+    if (!rootFolder) {
+      return {
+        error:
+          lang == "en"
+            ? "This folder doesn't contain a .env which is required for Nebula"
+            : "Ce dossier ne contient pas de .env qui est necessaire pour Nebula",
+      };
+    }
+    const zipPath = path.join(rootFolder, "root.zip");
+    if (existsSync(zipPath)) {
+      return {
+        error:
+          lang == "en"
+            ? "This folder already contains a root.zip"
+            : "Ce dossier contient deja un root.zip",
+      };
+    }
+    const dirs = [`${rootFolder}\\servers`, `${rootFolder}\\repo`];
+    const files = [`${rootFolder}\\distribution.json`];
+    const output = createWriteStream(zipPath);
+    const archive = archiver("zip", {
+      zlib: { level: 9 },
+    });
+    archive.pipe(output);
+    for (const dir of dirs) {
+      archive.directory(dir, path.basename(dir));
+    }
+    for (const file of files) {
+      archive.file(file, { name: path.basename(file) });
+    }
+    output.on("close", () => {
+      console.log(archive.pointer() + " total bytes");
+    });
+    await archive.finalize();
+    shell.showItemInFolder(zipPath);
+    return null;
+  });
+
+  ipcMain.handle("lang", () => lang);
+
   ipcMain.handle("confirmServer", async (e, info) => {
     const { serverId, mcVer, forgeVer, fabricVer } = info;
     if (!serverId) {
-      return { error: "Veuillez mettre un nom a votre serveur" };
+      return {
+        error:
+          lang == "en"
+            ? "Please enter a name for your server"
+            : "Veuillez mettre un nom a votre serveur",
+      };
     }
     if (!mcVer) {
-      return { error: "Veuillez mettre une version de Minecraft" };
+      return {
+        error:
+          lang == "en"
+            ? "Please enter a Minecraft version"
+            : "Veuillez mettre une version de Minecraft",
+      };
     }
     if (!forgeVer && !fabricVer) {
-      return { error: "Veuillez mettre une version de Forge ou Fabric" };
+      return {
+        error:
+          lang == "en"
+            ? "Please enter a Forge or Fabric version"
+            : "Veuillez mettre une version de Forge ou Fabric",
+      };
     }
     if (forgeVer && fabricVer) {
-      return { error: "Veuillez mettre une seule version de Forge ou Fabric" };
+      return {
+        error:
+          lang == "en"
+            ? "Please enter only one version of Forge or Fabric"
+            : "Veuillez mettre une seule version de Forge ou Fabric",
+      };
     }
     let f = "";
     if (forgeVer) {
@@ -159,7 +272,12 @@ const createWindow = () => {
     console.log(cmd);
     console.log(nebulDir);
     if (!nebulDir) {
-      return { error: "Veuillez selectionner le dossier Nebula" };
+      return {
+        error:
+          lang == "en"
+            ? "Please select your Nebula folder"
+            : "Veuillez selectionner le dossier Nebula",
+      };
     }
     await runCmd(cmd, nebulDir);
     return { success: true };
@@ -172,7 +290,18 @@ const createWindow = () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on("ready", createWindow);
+app.on("ready", async () => {
+  lang = await new Promise(async (resolve) => {
+    const r = await dialog.showMessageBox({
+      message: "Select your language",
+      title: "Select your language",
+      buttons: ["Français", "English"],
+    });
+    resolve(r.response === 0 ? "fr" : "en");
+  });
+  console.log(lang);
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
