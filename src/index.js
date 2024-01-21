@@ -13,7 +13,7 @@ if (require("electron-squirrel-startup")) {
 }
 
 async function runCmd(cmd, dir) {
-  const { spawn } = require("child_process");
+  const { spawn, execSync } = require("child_process");
   return new Promise((resolve, reject) => {
     const child = spawn("start", ["/wait", "cmd", '/c "', cmd, ' & pause"'], {
       shell: true,
@@ -226,7 +226,29 @@ const createWindow = async () => {
     return null;
   });
 
+  ipcMain.on("restartApp", () => {
+    app.relaunch();
+    app.exit();
+  });
+
   ipcMain.handle("lang", () => lang);
+
+  ipcMain.on("createNebula", () => {
+    mainWindow.hide();
+    const nebulawindow = new BrowserWindow({
+      width: 800,
+      height: 600,
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false,
+      },
+      autoHideMenuBar: true,
+    });
+    nebulawindow.on("closed", () => {
+      mainWindow.show();
+    });
+    nebulawindow.loadFile(path.join(__dirname, "create.html"));
+  });
 
   ipcMain.handle("confirmServer", async (e, info) => {
     const { serverId, mcVer, forgeVer, fabricVer } = info;
@@ -293,8 +315,8 @@ const createWindow = async () => {
 app.on("ready", async () => {
   lang = await new Promise(async (resolve) => {
     const r = await dialog.showMessageBox({
-      message: "Select your language",
-      title: "Select your language",
+      message: "Select your language/Selectionner votre langue",
+      title: "NebulaGUI",
       buttons: ["Français", "English"],
     });
     resolve(r.response === 0 ? "fr" : "en");

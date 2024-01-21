@@ -15,6 +15,21 @@
     <h1>Nebula GUI</h1>
     <p id="welcome">Bienvenue</p>
     <p id="dir">Nebula: ...</p>
+    <button
+      class="topright btn btn-primary"
+      id="createnebula"
+      onclick="createNebula()"
+    >
+      Créer un dossier NEBULA
+    </button>
+    <button
+      class="topright btn btn-primary"
+      id="restart"
+      style="top: 50px"
+      onclick="restartApp()"
+    >
+      Changer de langue
+    </button>
     <div class="container text-center">
       <div class="row">
         <div class="col">
@@ -236,10 +251,19 @@
         setLoading(false, "#deletezip");
         getNebulaDir();
       }
-      async function getNebulaDir(force = false) {
-        if (force || !nebulaDir) {
+      function createNebula() {
+        ipcRenderer.send("createNebula");
+      }
+      function restartApp() {
+        ipcRenderer.send("restartApp");
+      }
+      async function getNebulaDir(force = false, text) {
+        if (force || (!nebulaDir && !text)) {
           nebulaDir = await ipcRenderer.invoke("getNebulaDir");
           if (!nebulaDir) nebulaDir = null;
+        }
+        if (text) {
+          nebulaDir = text;
         }
         console.log(nebulaDir);
         let str = "Nebula: ";
@@ -258,6 +282,7 @@
           document.getElementById("openfolder").disabled = false;
           document.getElementById("openrootfolder").disabled = false;
           document.getElementById("ziprootfolder").disabled = false;
+          document.getElementById("deletezip").disabled = false;
           const envfile = path.join(nebulaDir, ".env");
           const env = fs.readFileSync(envfile, "utf-8").toString();
           const envlines = env.split("\n");
@@ -288,23 +313,26 @@
           document.getElementById("openfolder").disabled = true;
           document.getElementById("openrootfolder").disabled = true;
           document.getElementById("ziprootfolder").disabled = true;
+          document.getElementById("deletezip").disabled = true;
         }
         document.getElementById("dir").innerHTML = str;
-        const envfile = path.join(nebulaDir, ".env");
-        const envlines = fs.readFileSync(envfile, "utf-8").split("\n");
-        let rootFolder;
-        for (const line of envlines) {
-          if (line.startsWith("ROOT=")) {
-            rootFolder = line.split("=")[1].trim();
-            break;
+        if (nebulaDir) {
+          const envfile = path.join(nebulaDir, ".env");
+          const envlines = fs.readFileSync(envfile, "utf-8").split("\n");
+          let rootFolder;
+          for (const line of envlines) {
+            if (line.startsWith("ROOT=")) {
+              rootFolder = line.split("=")[1].trim();
+              break;
+            }
           }
-        }
-        if (!rootFolder) return;
+          if (!rootFolder) return;
 
-        if (!fs.existsSync(path.join(rootFolder, "root.zip"))) {
-          document.getElementById("deletezip").disabled = true;
-        } else {
-          document.getElementById("deletezip").disabled = false;
+          if (!fs.existsSync(path.join(rootFolder, "root.zip"))) {
+            document.getElementById("deletezip").disabled = true;
+          } else {
+            document.getElementById("deletezip").disabled = false;
+          }
         }
         return nebulaDir;
       }
@@ -328,6 +356,9 @@
           document.getElementById("ziprootfolder").innerHTML =
             "Compress root folder (only needed for deployment)";
           document.getElementById("deletezip").innerHTML = "Delete zip";
+          document.getElementById("createnebula").innerHTML =
+            "Create a NEBULA folder";
+          document.getElementById("restart").innerHTML = "Change language";
         }
         await getNebulaDir();
       };

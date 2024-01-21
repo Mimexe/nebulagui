@@ -5,3 +5,10 @@ body {
   max-width: 38rem;
   padding: 2rem;
 }
+
+.topright {
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  font-size: 18px;
+}
