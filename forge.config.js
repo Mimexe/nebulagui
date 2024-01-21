@@ -14,11 +14,19 @@ module.exports = {
     },
     {
       name: "@electron-forge/maker-deb",
-      config: {},
+      config: {
+        executableName: "nebulagui",
+        description: "Nebula GUI",
+        categories: ["Utility"],
+      },
     },
     {
       name: "@electron-forge/maker-rpm",
-      config: {},
+      config: {
+        executableName: "nebulagui",
+        description: "Nebula GUI",
+        categories: ["Utility"],
+      },
     },
   ],
   plugins: [
