@@ -1,5 +1,6 @@
 module.exports = {
   packagerConfig: {
+    executableName: "nebulagui",
     asar: true,
   },
   rebuildConfig: {},
@@ -15,7 +16,6 @@ module.exports = {
     {
       name: "@electron-forge/maker-deb",
       config: {
-        executableName: "nebulagui",
         description: "Nebula GUI",
         categories: ["Utility"],
       },
@@ -23,7 +23,6 @@ module.exports = {
     {
       name: "@electron-forge/maker-rpm",
       config: {
-        executableName: "nebulagui",
         description: "Nebula GUI",
         categories: ["Utility"],
       },
