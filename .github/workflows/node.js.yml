@@ -26,9 +26,9 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run make
+        cache: 'yarn'
+    - run: yarn
+    - run: yarn run make
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.2.0
       with:
