@@ -18,8 +18,13 @@
   },
   "license": "MIT",
   "dependencies": {
+<<<<<<< HEAD
     "archiver": "^7.0.1",
     "axios": "^1.6.8",
+=======
+    "archiver": "^6.0.2",
+    "axios": "^1.6.7",
+>>>>>>> c235408b290704b7deae2d7651698f43dc565846
     "command-exists": "^1.2.9",
     "electron-squirrel-startup": "^1.0.0"
   },
