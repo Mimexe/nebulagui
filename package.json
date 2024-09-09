@@ -23,7 +23,7 @@
     "archiver": "^7.0.1",
     "axios": "^1.6.8",
     "command-exists": "^1.2.9",
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.1"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.3.1",
