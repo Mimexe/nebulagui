@@ -19,7 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "archiver": "^7.0.1",
-    "axios": "^1.6.8",
+    "axios": "^1.7.4",
     "archiver": "^7.0.1",
     "axios": "^1.6.8",
     "command-exists": "^1.2.9",
