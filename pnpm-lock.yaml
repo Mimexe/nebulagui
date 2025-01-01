@@ -1799,6 +1799,8 @@ snapshots:
       fs-extra: 10.1.0
       listr2: 7.0.2
       semver: 7.6.3
+      listr2: 7.0.2
+      semver: 7.6.3
     transitivePeerDependencies:
       - bluebird
       - encoding
@@ -1814,6 +1816,7 @@ snapshots:
       find-up: 5.0.0
       fs-extra: 10.1.0
       log-symbols: 4.1.0
+      semver: 7.6.3
       semver: 7.6.3
       yarn-or-npm: 3.0.1
     transitivePeerDependencies:
@@ -1846,12 +1849,14 @@ snapshots:
       got: 11.8.6
       interpret: 3.1.1
       listr2: 7.0.2
+      listr2: 7.0.2
       lodash: 4.17.21
       log-symbols: 4.1.0
       node-fetch: 2.7.0(encoding@0.1.13)
       progress: 2.0.3
       rechoir: 0.8.0
       resolve-package: 1.0.1
+      semver: 7.6.3
       semver: 7.6.3
       source-map-support: 0.5.21
       sudo-prompt: 9.2.1
@@ -1897,6 +1902,7 @@ snapshots:
       '@electron-forge/shared-types': 7.4.0
       fs-extra: 10.1.0
     optionalDependencies:
+      electron-winstaller: 5.4.0
       electron-winstaller: 5.4.0
     transitivePeerDependencies:
       - bluebird
@@ -2083,9 +2089,9 @@ snapshots:
       got: 11.8.6
       node-abi: 3.67.0
       node-api-version: 0.2.0
-      node-gyp: 9.4.1
       ora: 5.4.1
       read-binary-file-arch: 1.0.6
+      semver: 7.6.3
       semver: 7.6.3
       tar: 6.2.1
       yargs: 17.7.2
@@ -2100,6 +2106,7 @@ snapshots:
       debug: 4.3.6
       dir-compare: 4.2.0
       fs-extra: 11.2.0
+      minimatch: 9.0.5
       minimatch: 9.0.5
       plist: 3.1.0
     transitivePeerDependencies:
@@ -2137,14 +2144,14 @@ snapshots:
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
-      '@nodelib/fs.stat': 2.0.5
+      "@nodelib/fs.stat": 2.0.5
       run-parallel: 1.2.0
 
   '@nodelib/fs.stat@2.0.5': {}
 
   '@nodelib/fs.walk@1.2.8':
     dependencies:
-      '@nodelib/fs.scandir': 2.1.5
+      "@nodelib/fs.scandir": 2.1.5
       fastq: 1.17.1
 
   '@npmcli/fs@2.1.2':
@@ -2296,8 +2303,8 @@ snapshots:
 
   axios@1.7.7:
     dependencies:
-      follow-redirects: 1.15.6
-      form-data: 4.0.0
+      follow-redirects: 1.15.9
+      form-data: 4.0.1
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
@@ -2353,8 +2360,8 @@ snapshots:
 
   cacache@16.1.3:
     dependencies:
-      '@npmcli/fs': 2.1.2
-      '@npmcli/move-file': 2.0.1
+      "@npmcli/fs": 2.1.2
+      "@npmcli/move-file": 2.0.1
       chownr: 2.0.0
       fs-minipass: 2.1.0
       glob: 8.1.0
@@ -2547,7 +2554,7 @@ snapshots:
 
   electron-installer-common@0.10.3:
     dependencies:
-      '@malept/cross-spawn-promise': 1.1.1
+      "@malept/cross-spawn-promise": 1.1.1
       asar: 3.2.0
       debug: 4.3.6
       fs-extra: 9.1.0
@@ -2555,9 +2562,10 @@ snapshots:
       lodash: 4.17.21
       parse-author: 2.0.0
       semver: 7.6.3
+      semver: 7.6.3
       tmp-promise: 3.0.3
     optionalDependencies:
-      '@types/fs-extra': 9.0.13
+      "@types/fs-extra": 9.0.13
     transitivePeerDependencies:
       - supports-color
     optional: true
@@ -2600,6 +2608,7 @@ snapshots:
       '@electron/asar': 3.2.10
       debug: 4.3.6
       fs-extra: 7.0.1
+      lodash: 4.17.21
       lodash: 4.17.21
       temp: 0.9.4
     optionalDependencies:
@@ -2663,7 +2672,7 @@ snapshots:
 
   execa@1.0.0:
     dependencies:
-      cross-spawn: 6.0.5
+      cross-spawn: 6.0.6
       get-stream: 4.1.0
       is-stream: 1.1.0
       npm-run-path: 2.0.2
@@ -2683,7 +2692,7 @@ snapshots:
       get-stream: 5.2.0
       yauzl: 2.10.0
     optionalDependencies:
-      '@types/yauzl': 2.10.3
+      "@types/yauzl": 2.10.3
     transitivePeerDependencies:
       - supports-color
 
@@ -2691,8 +2700,8 @@ snapshots:
 
   fast-glob@3.3.2:
     dependencies:
-      '@nodelib/fs.stat': 2.0.5
-      '@nodelib/fs.walk': 1.2.8
+      "@nodelib/fs.stat": 2.0.5
+      "@nodelib/fs.walk": 1.2.8
       glob-parent: 5.1.2
       merge2: 1.4.1
       micromatch: 4.0.8
@@ -2888,6 +2897,7 @@ snapshots:
       matcher: 3.0.0
       roarr: 2.15.4
       semver: 7.6.3
+      semver: 7.6.3
       serialize-error: 7.0.1
     optional: true
 
@@ -2918,10 +2928,10 @@ snapshots:
 
   got@11.8.6:
     dependencies:
-      '@sindresorhus/is': 4.6.0
-      '@szmarczak/http-timer': 4.0.6
-      '@types/cacheable-request': 6.0.3
-      '@types/responselike': 1.0.3
+      "@sindresorhus/is": 4.6.0
+      "@szmarczak/http-timer": 4.0.6
+      "@types/cacheable-request": 6.0.3
+      "@types/responselike": 1.0.3
       cacheable-lookup: 5.0.4
       cacheable-request: 7.0.4
       decompress-response: 6.0.0
@@ -2961,7 +2971,7 @@ snapshots:
 
   http-proxy-agent@5.0.0:
     dependencies:
-      '@tootallnate/once': 2.0.0
+      "@tootallnate/once": 2.0.0
       agent-base: 6.0.2
       debug: 4.3.6
     transitivePeerDependencies:
@@ -3050,7 +3060,7 @@ snapshots:
 
   jackspeak@3.4.3:
     dependencies:
-      '@isaacs/cliui': 8.0.2
+      "@isaacs/cliui": 8.0.2
     optionalDependencies:
       '@pkgjs/parseargs': 0.11.0
 
@@ -3083,6 +3093,7 @@ snapshots:
 
   listr2@7.0.2:
     dependencies:
+      cli-truncate: 3.1.0
       cli-truncate: 3.1.0
       colorette: 2.0.20
       eventemitter3: 5.0.1
@@ -3147,7 +3158,7 @@ snapshots:
       minipass-fetch: 2.1.2
       minipass-flush: 1.0.5
       minipass-pipeline: 1.2.4
-      negotiator: 0.6.3
+      negotiator: 0.6.4
       promise-retry: 2.0.1
       socks-proxy-agent: 7.0.0
       ssri: 9.0.1
@@ -3174,6 +3185,7 @@ snapshots:
 
   micromatch@4.0.8:
     dependencies:
+      braces: 3.0.3
       braces: 3.0.3
       picomatch: 2.3.1
 
@@ -3295,7 +3307,7 @@ snapshots:
   normalize-package-data@2.5.0:
     dependencies:
       hosted-git-info: 2.8.9
-      resolve: 1.22.8
+      resolve: 1.22.9
       semver: 5.7.2
       validate-npm-package-license: 3.0.4
 
@@ -3424,7 +3436,7 @@ snapshots:
 
   plist@3.1.0:
     dependencies:
-      '@xmldom/xmldom': 0.8.10
+      "@xmldom/xmldom": 0.8.10
       base64-js: 1.5.1
       xmlbuilder: 15.1.1
 
@@ -3849,6 +3861,7 @@ snapshots:
     dependencies:
       cliui: 7.0.4
       escalade: 3.2.0
+      escalade: 3.2.0
       get-caller-file: 2.0.5
       require-directory: 2.1.1
       string-width: 4.2.3
@@ -3860,6 +3873,7 @@ snapshots:
     dependencies:
       cliui: 8.0.1
       escalade: 3.2.0
+      escalade: 3.2.0
       get-caller-file: 2.0.5
       require-directory: 2.1.1
       string-width: 4.2.3
@@ -3868,7 +3882,7 @@ snapshots:
 
   yarn-or-npm@3.0.1:
     dependencies:
-      cross-spawn: 6.0.5
+      cross-spawn: 6.0.6
       pkg-dir: 4.2.0
 
   yauzl@2.10.0:

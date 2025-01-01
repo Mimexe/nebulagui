@@ -20,8 +20,6 @@
   "dependencies": {
     "archiver": "^7.0.1",
     "axios": "^1.7.7",
-    "archiver": "^7.0.1",
-    "axios": "^1.7.7",
     "command-exists": "^1.2.9",
     "electron-squirrel-startup": "^1.0.1"
   },
