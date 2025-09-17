@@ -40,8 +40,8 @@ importers:
         specifier: ^7.4.0
         version: 7.9.0
       electron:
-        specifier: 38.1.0
-        version: 38.1.0
+        specifier: 38.1.1
+        version: 38.1.1
 
 packages:
 
@@ -297,9 +297,6 @@ packages:
 
   '@types/mute-stream@0.0.4':
     resolution: {integrity: sha512-CPM9nzrCPPJHQNA9keH9CVkVI+WR5kMa+7XEs5jcGQ0VoAGnLv242w8lIVgwAEfmE4oufJRaTc9PNLQl0ioAow==}
-
-  '@types/node@22.15.17':
-    resolution: {integrity: sha512-wIX2aSZL5FE+MR0JlvF87BNVrtFWf6AE6rxSE9X7OwnVvoyCQjpzSRJ+M87se/4QCkCiebQAqrJ0y6fwIyi7nw==}
 
   '@types/node@22.18.1':
     resolution: {integrity: sha512-rzSDyhn4cYznVG+PCzGe1lwuMYJrcBS1fc3JqSa2PvtABwWo+dZ1ij5OVok3tqfpEBCBoaR4d7upFJk73HRJDw==}
@@ -658,8 +655,8 @@ packages:
     resolution: {integrity: sha512-bO3y10YikuUwUuDUQRM4KfwNkKhnpVO7IPdbsrejwN9/AABJzzTQ4GeHwyzNSrVO+tEH3/Np255a3sVZpZDjvg==}
     engines: {node: '>=8.0.0'}
 
-  electron@38.1.0:
-    resolution: {integrity: sha512-ypA8GF8RU4HD5pA1sa0/2U8k+92EPP2c7pX+3XbgB760F7OmqrFXtYkOilVw6HfV4+lk88XxqigmsUKTACQYoQ==}
+  electron@38.1.1:
+    resolution: {integrity: sha512-LTFGxXpbIdU07AwSHLoVYVLbZHDiauT1KgTX1fgCPgPDoQIAGnYft/ABx6PkA+9ulQfBEEqg0mYTWaoReHG8Ag==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -2361,11 +2358,7 @@ snapshots:
 
   '@types/mute-stream@0.0.4':
     dependencies:
-      '@types/node': 22.18.1
-
-  '@types/node@22.15.17':
-    dependencies:
-      undici-types: 6.21.0
+      '@types/node': 24.3.1
 
   '@types/node@22.18.1':
     dependencies:
@@ -2383,7 +2376,7 @@ snapshots:
 
   '@types/yauzl@2.10.3':
     dependencies:
-      '@types/node': 22.15.17
+      '@types/node': 24.3.1
     optional: true
 
   '@vscode/sudo-prompt@9.3.1': {}
@@ -2781,10 +2774,10 @@ snapshots:
       - supports-color
     optional: true
 
-  electron@38.1.0:
+  electron@38.1.1:
     dependencies:
       '@electron/get': 2.0.3
-      '@types/node': 22.15.17
+      '@types/node': 22.18.1
       extract-zip: 2.0.1
     transitivePeerDependencies:
       - supports-color
